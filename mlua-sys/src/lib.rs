@@ -1,4 +1,4 @@
-//! Low level bindings to Lua 5.4/5.3/5.2/5.1 (including LuaJIT) and Roblox Luau.
+//! Low level bindings to Lua 5.4/5.3/5.2/5.1 (including LuaJIT), Roblox Luau and Factorio flua.
 
 #![allow(non_camel_case_types, non_snake_case, dead_code)]
 #![allow(clippy::missing_safety_doc)]
@@ -22,7 +22,15 @@ pub use lua51::*;
 #[cfg(any(feature = "luau", doc))]
 pub use luau::*;
 
-#[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+#[cfg(any(feature = "flua", doc))]
+pub use flua::*;
+
+#[cfg(any(
+    feature = "lua54",
+    feature = "lua53",
+    feature = "lua52",
+    feature = "flua"
+))]
 #[doc(hidden)]
 pub const LUA_MAX_UPVALUES: c_int = 255;
 
@@ -99,3 +107,7 @@ pub mod lua51;
 #[cfg(any(feature = "luau", doc))]
 #[cfg_attr(docsrs, doc(cfg(feature = "luau")))]
 pub mod luau;
+
+#[cfg(any(feature = "flua", doc))]
+#[cfg_attr(docsrs, doc(cfg(feature = "flua")))]
+pub mod flua;

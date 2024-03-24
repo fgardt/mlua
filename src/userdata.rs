@@ -108,6 +108,7 @@ pub enum MetaMethod {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luajit52",
     ))]
     Pairs,
@@ -115,11 +116,14 @@ pub enum MetaMethod {
     ///
     /// This is not an operator, but it will be called by the built-in [`ipairs`] function.
     ///
-    /// Requires `feature = "lua52"`
+    /// Requires `feature = "lua52", feature = "flua"`
     ///
     /// [`ipairs`]: https://www.lua.org/manual/5.2/manual.html#pdf-ipairs
-    #[cfg(any(feature = "lua52", feature = "luajit52", doc))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "lua52", feature = "luajit52"))))]
+    #[cfg(any(feature = "lua52", feature = "flua", feature = "luajit52", doc))]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(any(feature = "lua52", feature = "flua", feature = "luajit52")))
+    )]
     IPairs,
     /// The `__iter` metamethod.
     ///
@@ -209,10 +213,11 @@ impl MetaMethod {
                 feature = "lua54",
                 feature = "lua53",
                 feature = "lua52",
+                feature = "flua",
                 feature = "luajit52"
             ))]
             MetaMethod::Pairs => "__pairs",
-            #[cfg(any(feature = "lua52", feature = "luajit52"))]
+            #[cfg(any(feature = "lua52", feature = "flua", feature = "luajit52"))]
             MetaMethod::IPairs => "__ipairs",
             #[cfg(feature = "luau")]
             MetaMethod::Iter => "__iter",

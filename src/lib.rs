@@ -76,6 +76,9 @@
 #![doc(test(attr(deny(warnings))))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
+#[cfg(all(feature = "async", feature = "flua"))]
+compile_error!("flua does not support any async features!");
+
 #[macro_use]
 mod macros;
 

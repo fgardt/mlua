@@ -540,6 +540,7 @@ fn test_num_conversion() -> Result<()> {
     assert_eq!(lua.load("1.0").eval::<String>()?, "1.0");
     #[cfg(any(
         feature = "lua52",
+        feature = "flua",
         feature = "lua51",
         feature = "luajit",
         feature = "luau"
@@ -624,6 +625,7 @@ fn test_pcall_xpcall() -> Result<()> {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luajit"
     ))]
     assert_eq!(
@@ -1099,6 +1101,7 @@ fn test_chunk_env() -> Result<()> {
 }
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_context_thread() -> Result<()> {
     let lua = Lua::new();
 
@@ -1115,6 +1118,7 @@ fn test_context_thread() -> Result<()> {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luajit52"
     ))]
     f.call::<_, ()>(lua.current_thread())?;
@@ -1198,6 +1202,7 @@ fn test_load_from_function() -> Result<()> {
 }
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_inspect_stack() -> Result<()> {
     let lua = Lua::new();
 
@@ -1235,6 +1240,7 @@ fn test_inspect_stack() -> Result<()> {
 }
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_multi_states() -> Result<()> {
     let lua = Lua::new();
 

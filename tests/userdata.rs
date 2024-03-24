@@ -151,6 +151,7 @@ fn test_metamethods() -> Result<()> {
                 feature = "lua54",
                 feature = "lua53",
                 feature = "lua52",
+                feature = "flua",
                 feature = "luajit52"
             ))]
             methods.add_meta_method(MetaMethod::Pairs, |lua, data, ()| {
@@ -184,6 +185,7 @@ fn test_metamethods() -> Result<()> {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luajit52"
     ))]
     let pairs_it = lua
@@ -214,6 +216,7 @@ fn test_metamethods() -> Result<()> {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luajit52"
     ))]
     assert_eq!(pairs_it.call::<_, i64>(())?, 28);

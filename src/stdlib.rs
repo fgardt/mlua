@@ -40,7 +40,13 @@ impl StdLib {
     /// [`bit`](https://www.lua.org/manual/5.2/manual.html#6.7) library
     ///
     /// Requires `feature = "lua52/luajit/luau"`
-    #[cfg(any(feature = "lua52", feature = "luajit", feature = "luau", doc))]
+    #[cfg(any(
+        feature = "lua52",
+        feature = "flua",
+        feature = "luajit",
+        feature = "luau",
+        doc
+    ))]
     pub const BIT: StdLib = StdLib(1 << 6);
 
     /// [`math`](https://www.lua.org/manual/5.4/manual.html#6.7) library

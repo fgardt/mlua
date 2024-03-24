@@ -1,8 +1,11 @@
 use std::panic::catch_unwind;
 
-use mlua::{Error, Function, Lua, Result, Thread, ThreadStatus};
+#[cfg(not(feature = "flua"))]
+use mlua::{Error, Function, ThreadStatus};
+use mlua::{Lua, Result, Thread};
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_thread() -> Result<()> {
     let lua = Lua::new();
 
@@ -150,6 +153,7 @@ fn test_thread_reset() -> Result<()> {
 }
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_coroutine_from_closure() -> Result<()> {
     let lua = Lua::new();
 
@@ -204,7 +208,7 @@ fn test_thread_pointer() -> Result<()> {
     Ok(())
 }
 
-#[cfg(all(feature = "unstable", not(feature = "send")))]
+#[cfg(all(feature = "unstable", not(feature = "send"), not(feature = "flua")))]
 #[test]
 fn test_owned_thread() -> Result<()> {
     let lua = Lua::new();

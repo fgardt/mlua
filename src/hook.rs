@@ -170,9 +170,19 @@ impl<'lua> Debug<'lua> {
             #[cfg(not(feature = "luau"))]
             let stack = DebugStack {
                 num_ups: (*self.ar.get()).nups as _,
-                #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+                #[cfg(any(
+                    feature = "lua54",
+                    feature = "lua53",
+                    feature = "lua52",
+                    feature = "flua"
+                ))]
                 num_params: (*self.ar.get()).nparams as _,
-                #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+                #[cfg(any(
+                    feature = "lua54",
+                    feature = "lua53",
+                    feature = "lua52",
+                    feature = "flua"
+                ))]
                 is_vararg: (*self.ar.get()).isvararg != 0,
             };
             #[cfg(feature = "luau")]
@@ -246,6 +256,7 @@ pub struct DebugStack {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luau"
     ))]
     pub num_params: i32,
@@ -254,6 +265,7 @@ pub struct DebugStack {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luau"
     ))]
     pub is_vararg: bool,

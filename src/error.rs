@@ -37,8 +37,11 @@ pub enum Error {
     /// Lua garbage collector error, aka `LUA_ERRGCMM`.
     ///
     /// The Lua VM returns this error when there is an error running a `__gc` metamethod.
-    #[cfg(any(feature = "lua53", feature = "lua52", doc))]
-    #[cfg_attr(docsrs, doc(cfg(any(feature = "lua53", feature = "lua52"))))]
+    #[cfg(any(feature = "lua53", feature = "lua52", feature = "flua", doc))]
+    #[cfg_attr(
+        docsrs,
+        doc(cfg(any(feature = "lua53", feature = "lua52", feature = "flua")))
+    )]
     GarbageCollectorError(StdString),
     /// Potentially unsafe action in safe mode.
     SafetyError(StdString),
@@ -211,7 +214,7 @@ impl fmt::Display for Error {
             Error::MemoryError(ref msg) => {
                 write!(fmt, "memory error: {msg}")
             }
-            #[cfg(any(feature = "lua53", feature = "lua52"))]
+            #[cfg(any(feature = "lua53", feature = "lua52", feature = "flua"))]
             Error::GarbageCollectorError(ref msg) => {
                 write!(fmt, "garbage collector error: {msg}")
             }

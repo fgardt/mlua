@@ -6,6 +6,7 @@ use std::string::String as StdString;
 use mlua::{Error, LightUserData, Lua, MultiValue, Result, UserData, UserDataMethods, Value};
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_value_eq() -> Result<()> {
     let lua = Lua::new();
     let globals = lua.globals();
@@ -126,8 +127,11 @@ fn test_value_to_string() -> Result<()> {
     let func: Value = lua.load("function() end").eval()?;
     assert!(func.to_string()?.starts_with("function:"));
 
-    let thread: Value = lua.load("coroutine.create(function() end)").eval()?;
-    assert!(thread.to_string()?.starts_with("thread:"));
+    #[cfg(not(feature = "flua"))]
+    {
+        let thread: Value = lua.load("coroutine.create(function() end)").eval()?;
+        assert!(thread.to_string()?.starts_with("thread:"));
+    }
 
     lua.register_userdata_type::<StdString>(|reg| {
         reg.add_meta_method("__tostring", |_, this, ()| Ok(this.clone()));

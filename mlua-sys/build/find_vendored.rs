@@ -25,5 +25,8 @@ pub fn probe_lua() {
         .set_vector_size(if cfg!(feature = "luau-vector4") { 4 } else { 3 })
         .build();
 
+    #[cfg(feature = "flua")]
+    let artifacts = flua_src::Build::new().build();
+
     artifacts.print_cargo_metadata();
 }

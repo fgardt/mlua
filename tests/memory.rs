@@ -35,6 +35,7 @@ fn test_memory_limit() -> Result<()> {
 }
 
 #[test]
+#[cfg(not(feature = "flua"))]
 fn test_memory_limit_thread() -> Result<()> {
     let lua = Lua::new();
 
@@ -72,6 +73,7 @@ fn test_gc_control() -> Result<()> {
         feature = "lua54",
         feature = "lua53",
         feature = "lua52",
+        feature = "flua",
         feature = "luau"
     ))]
     {
@@ -99,7 +101,7 @@ fn test_gc_control() -> Result<()> {
     Ok(())
 }
 
-#[cfg(any(feature = "lua53", feature = "lua52"))]
+#[cfg(any(feature = "lua53", feature = "lua52", feature = "flua"))]
 #[test]
 fn test_gc_error() {
     use mlua::Error;

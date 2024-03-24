@@ -197,8 +197,9 @@ fn test_function_info() -> Result<()> {
     #[cfg(feature = "luau")]
     assert_eq!(function1_info.name.as_deref(), Some("function1"));
     assert_eq!(function1_info.source.as_deref(), Some("source1"));
+    #[cfg(not(feature = "flua"))]
     assert_eq!(function1_info.line_defined, Some(2));
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     assert_eq!(function1_info.last_line_defined, Some(4));
     #[cfg(feature = "luau")]
     assert_eq!(function1_info.last_line_defined, None);
@@ -207,8 +208,9 @@ fn test_function_info() -> Result<()> {
     let function2_info = function2.info();
     assert_eq!(function2_info.name, None);
     assert_eq!(function2_info.source.as_deref(), Some("source1"));
+    #[cfg(not(feature = "flua"))]
     assert_eq!(function2_info.line_defined, Some(3));
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     assert_eq!(function2_info.last_line_defined, Some(3));
     #[cfg(feature = "luau")]
     assert_eq!(function2_info.last_line_defined, None);
@@ -217,7 +219,9 @@ fn test_function_info() -> Result<()> {
     let function3_info = function3.info();
     assert_eq!(function3_info.name, None);
     assert_eq!(function3_info.source.as_deref(), Some("=[C]"));
+    #[cfg(not(feature = "flua"))]
     assert_eq!(function3_info.line_defined, None);
+    #[cfg(not(feature = "flua"))]
     assert_eq!(function3_info.last_line_defined, None);
     assert_eq!(function3_info.what, "C");
 
@@ -226,6 +230,7 @@ fn test_function_info() -> Result<()> {
     assert_eq!(print_info.name.as_deref(), Some("print"));
     assert_eq!(print_info.source.as_deref(), Some("=[C]"));
     assert_eq!(print_info.what, "C");
+    #[cfg(not(feature = "flua"))]
     assert_eq!(print_info.line_defined, None);
 
     Ok(())

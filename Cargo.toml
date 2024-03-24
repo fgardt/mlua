@@ -16,16 +16,23 @@ with async/await features and support of writing native Lua modules in Rust.
 """
 
 [package.metadata.docs.rs]
-features = ["lua54", "vendored", "async", "send", "serialize", "macros", "parking_lot", "unstable"]
+features = [
+    "lua54",
+    "vendored",
+    "async",
+    "send",
+    "serialize",
+    "macros",
+    "parking_lot",
+    "unstable",
+]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [workspace]
-members = [
-    "mlua_derive",
-    "mlua-sys",
-]
+members = ["mlua_derive", "mlua-sys"]
 
 [features]
+default = ["flua", "vendored"]
 lua54 = ["ffi/lua54"]
 lua53 = ["ffi/lua53"]
 lua52 = ["ffi/lua52"]
@@ -35,6 +42,7 @@ luajit52 = ["luajit", "ffi/luajit52"]
 luau = ["ffi/luau", "dep:libloading"]
 luau-jit = ["luau", "ffi/luau-codegen"]
 luau-vector4 = ["luau", "ffi/luau-vector4"]
+flua = ["ffi/flua"]
 vendored = ["ffi/vendored"]
 module = ["dep:mlua_derive", "ffi/module"]
 async = ["dep:futures-util"]
@@ -49,7 +57,9 @@ bstr = { version = "1.0", features = ["std"], default_features = false }
 once_cell = { version = "1.0" }
 num-traits = { version = "0.2.14" }
 rustc-hash = "1.0"
-futures-util = { version = "0.3", optional = true, default-features = false, features = ["std"] }
+futures-util = { version = "0.3", optional = true, default-features = false, features = [
+    "std",
+] }
 serde = { version = "1.0", optional = true }
 erased-serde = { version = "0.4", optional = true }
 serde-value = { version = "0.7", optional = true }

@@ -1,21 +1,10 @@
+## THIS IS A FORK OF MLUA TO ADD SUPPORT FOR FACTORIOS SPECIAL LUA FLAVOUR
+
 # mlua
-[![Build Status]][github-actions] [![Latest Version]][crates.io] [![API Documentation]][docs.rs] [![Coverage Status]][codecov.io] ![MSRV]
-
-[Build Status]: https://github.com/khvzak/mlua/workflows/CI/badge.svg
-[github-actions]: https://github.com/khvzak/mlua/actions
-[Latest Version]: https://img.shields.io/crates/v/mlua.svg
-[crates.io]: https://crates.io/crates/mlua
-[API Documentation]: https://docs.rs/mlua/badge.svg
-[docs.rs]: https://docs.rs/mlua
-[Coverage Status]: https://codecov.io/gh/mlua-rs/mlua/branch/master/graph/badge.svg?token=99339FS1CG
-[codecov.io]: https://codecov.io/gh/mlua-rs/mlua
-[MSRV]: https://img.shields.io/badge/rust-1.71+-brightgreen.svg?&logo=rust
-
-[Guided Tour] | [Benchmarks] | [FAQ]
+[Guided Tour] | [Benchmarks]
 
 [Guided Tour]: examples/guided_tour.rs
 [Benchmarks]: https://github.com/khvzak/script-bench-rs
-[FAQ]: FAQ.md
 
 > **Note**
 >
@@ -49,6 +38,7 @@ Below is a list of the available feature flags. By default `mlua` does not enabl
 * `luau`: activate [Luau] support (auto vendored mode)
 * `luau-jit`: activate [Luau] support with JIT backend.
 * `luau-vector4`: activate [Luau] support with 4-dimensional vector.
+* `flua`: activate [flua] support.
 * `vendored`: build static Lua(JIT) library from sources during `mlua` compilation using [lua-src] or [luajit-src] crates
 * `module`: enable module mode (building loadable `cdylib` library for Lua)
 * `async`: enable async/await support (any executor can be used, eg. [tokio] or [async-std])
@@ -66,6 +56,7 @@ Below is a list of the available feature flags. By default `mlua` does not enabl
 [Luau]: https://github.com/Roblox/luau
 [lua-src]: https://github.com/khvzak/lua-src-rs
 [luajit-src]: https://github.com/khvzak/luajit-src-rs
+[flua]: https://github.com/Rseding91/Factorio-Lua
 [tokio]: https://github.com/tokio-rs/tokio
 [async-std]: https://github.com/async-rs/async-std
 [`Send`]: https://doc.rust-lang.org/std/marker/trait.Send.html
@@ -74,7 +65,7 @@ Below is a list of the available feature flags. By default `mlua` does not enabl
 
 ### Async/await support
 
-`mlua` supports async/await for all Lua versions including Luau.
+`mlua` supports async/await for all Lua versions **except flua**.
 
 This works using Lua [coroutines](https://www.lua.org/manual/5.3/manual.html#2.6) and require running [Thread](https://docs.rs/mlua/latest/mlua/struct.Thread.html) along with enabling `feature = "async"` in `Cargo.toml`.
 
@@ -110,7 +101,7 @@ With `serialize` feature flag enabled, `mlua` allows you to serialize/deserializ
 
 ### Compiling
 
-You have to enable one of the features: `lua54`, `lua53`, `lua52`, `lua51`, `luajit(52)` or `luau`, according to the chosen Lua version.
+You have to enable one of the features: `lua54`, `lua53`, `lua52`, `lua51`, `luajit(52)`, `luau` or `flua`, according to the chosen Lua version.
 
 By default `mlua` uses `pkg-config` tool to find lua includes and libraries for the chosen Lua version.
 In most cases it works as desired, although sometimes could be more preferable to use a custom lua library.
@@ -122,8 +113,8 @@ An example how to use them:
 my_project $ LUA_LIB=$HOME/tmp/lua-5.2.4/src LUA_LIB_NAME=lua LUA_LINK=static cargo build
 ```
 
-`mlua` also supports vendored lua/luajit using the auxiliary crates [lua-src](https://crates.io/crates/lua-src) and
-[luajit-src](https://crates.io/crates/luajit-src).
+`mlua` also supports vendored lua/luajit using the auxiliary crates [lua-src](https://crates.io/crates/lua-src), 
+[luajit-src](https://crates.io/crates/luajit-src) and [flua-src](https://github.com/fgardt/flua-src-rs).
 Just enable the `vendored` feature and cargo will automatically build and link specified lua/luajit version. This is the easiest way to get started with `mlua`.
 
 ### Standalone mode
