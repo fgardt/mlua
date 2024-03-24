@@ -32,7 +32,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 members = ["mlua_derive", "mlua-sys"]
 
 [features]
-default = ["flua", "vendored"]
 lua54 = ["ffi/lua54"]
 lua53 = ["ffi/lua53"]
 lua52 = ["ffi/lua52"]
