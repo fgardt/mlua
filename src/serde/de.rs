@@ -145,7 +145,11 @@ impl<'lua, 'de> serde::Deserializer<'de> for Deserializer<'lua> {
                 Ok(s) => visitor.visit_str(s),
                 Err(_) => visitor.visit_bytes(s.as_bytes()),
             },
-            Value::Table(ref t) if t.raw_len() > 0 || t.is_array() => self.deserialize_seq(visitor),
+            Value::Table(ref t)
+                if t.raw_len() > 0 && t.raw_len() == t.clone().pairs::<Value, Value>().count() =>
+            {
+                self.deserialize_seq(visitor)
+            }
             Value::Table(_) => self.deserialize_map(visitor),
             Value::LightUserData(ud) if ud.0.is_null() => visitor.visit_none(),
             Value::UserData(ud) if ud.is_serializable() => {
