@@ -1,7 +1,11 @@
 [package]
 name = "mlua"
-version = "0.9.6" # remember to update mlua_derive
-authors = ["Aleksandr Orlenko <zxteam@pm.me>", "kyren <catherine@kyju.org>"]
+version = "0.9.7" # remember to update mlua_derive
+authors = [
+    "Aleksandr Orlenko <zxteam@pm.me>",
+    "kyren <catherine@kyju.org>",
+    "fgardt <me@fgardt.dev>",
+]
 rust-version = "1.71"
 edition = "2021"
 repository = "https://github.com/khvzak/mlua"
@@ -17,10 +21,8 @@ with async/await features and support of writing native Lua modules in Rust.
 
 [package.metadata.docs.rs]
 features = [
-    "lua54",
+    "flua",
     "vendored",
-    "async",
-    "send",
     "serialize",
     "macros",
     "parking_lot",

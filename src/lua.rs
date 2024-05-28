@@ -3576,8 +3576,18 @@ unsafe fn load_from_std_lib(state: *mut ffi::lua_State, libs: StdLib) -> Result<
         ffi::lua_pop(state, 1);
     }
 
+    #[cfg(not(feature = "flua"))]
     if libs.contains(StdLib::DEBUG) {
         requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_debug, 1)?;
+        ffi::lua_pop(state, 1);
+    }
+
+    #[cfg(feature = "flua")]
+    if libs.contains(StdLib::DEBUG) {
+        requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_fulldebug, 1)?;
+        ffi::lua_pop(state, 1);
+    } else if libs.contains(StdLib::PARTIAL_DEBUG) {
+        requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_partialdebug, 1)?;
         ffi::lua_pop(state, 1);
     }
 

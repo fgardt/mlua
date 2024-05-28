@@ -18,9 +18,10 @@ extern "C-unwind" {
     pub fn luaopen_string(L: *mut lua_State) -> c_int;
     pub fn luaopen_bit32(L: *mut lua_State) -> c_int;
     pub fn luaopen_math(L: *mut lua_State) -> c_int;
-    pub fn luaopen_debug(L: *mut lua_State) -> c_int;
+    pub fn luaopen_fulldebug(L: *mut lua_State) -> c_int;
+    pub fn luaopen_partialdebug(L: *mut lua_State) -> c_int;
     pub fn luaopen_package(L: *mut lua_State) -> c_int;
 
     // open all builtin libraries
-    pub fn luaL_openlibs(L: *mut lua_State);
+    pub fn luaL_openlibs(L: *mut lua_State, full_debug: c_int);
 }

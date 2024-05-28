@@ -67,6 +67,12 @@ impl StdLib {
     #[cfg_attr(docsrs, doc(cfg(feature = "luajit")))]
     pub const JIT: StdLib = StdLib(1 << 9);
 
+    /// [`flua's safe debug library subset`](https://lua-api.factorio.com/latest/auxiliary/libraries.html#%E2%80%A2-debug)
+    ///
+    /// Requires `feature = "flua"`
+    #[cfg(feature = "flua")]
+    pub const PARTIAL_DEBUG: StdLib = StdLib(1 << 10);
+
     /// (**unsafe**) [`ffi`](http://luajit.org/ext_ffi.html) library
     ///
     /// Requires `feature = "luajit"`
