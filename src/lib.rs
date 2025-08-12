@@ -69,6 +69,9 @@
 #![allow(clippy::ptr_eq)]
 #![allow(unsafe_op_in_unsafe_fn)]
 
+#[cfg(all(feature = "async", feature = "flua"))]
+compile_error!("flua does not support any async features!");
+
 #[macro_use]
 mod macros;
 
@@ -87,6 +90,7 @@ mod state;
 mod stdlib;
 mod string;
 mod table;
+#[cfg(not(feature = "flua"))]
 mod thread;
 mod traits;
 mod types;
@@ -110,6 +114,7 @@ pub use crate::state::{GCMode, Lua, LuaOptions, WeakLua};
 pub use crate::stdlib::StdLib;
 pub use crate::string::{BorrowedBytes, BorrowedStr, String};
 pub use crate::table::{Table, TablePairs, TableSequence};
+#[cfg(not(feature = "flua"))]
 pub use crate::thread::{Thread, ThreadStatus};
 pub use crate::traits::{
     FromLua, FromLuaMulti, IntoLua, IntoLuaMulti, LuaNativeFn, LuaNativeFnMut, ObjectLike,
@@ -123,7 +128,7 @@ pub use crate::userdata::{
 };
 pub use crate::value::{Nil, Value};
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 pub use crate::debug::HookTriggers;
 
 #[cfg(any(feature = "luau", doc))]

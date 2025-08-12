@@ -264,7 +264,7 @@ pub struct DebugStack {
 }
 
 /// Determines when a hook function will be called by Lua.
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
 #[derive(Clone, Copy, Debug, Default)]
 pub struct HookTriggers {
@@ -283,7 +283,7 @@ pub struct HookTriggers {
     pub every_nth_instruction: Option<u32>,
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 impl HookTriggers {
     /// An instance of `HookTriggers` with `on_calls` trigger set.
     pub const ON_CALLS: Self = HookTriggers::new().on_calls();
@@ -364,7 +364,7 @@ impl HookTriggers {
     }
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 impl std::ops::BitOr for HookTriggers {
     type Output = Self;
 
@@ -379,7 +379,7 @@ impl std::ops::BitOr for HookTriggers {
     }
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 impl std::ops::BitOrAssign for HookTriggers {
     fn bitor_assign(&mut self, rhs: Self) {
         *self = *self | rhs;

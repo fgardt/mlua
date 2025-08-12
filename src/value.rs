@@ -10,6 +10,7 @@ use crate::error::{Error, Result};
 use crate::function::Function;
 use crate::string::{BorrowedStr, String};
 use crate::table::Table;
+#[cfg(not(feature = "flua"))]
 use crate::thread::Thread;
 use crate::types::{Integer, LightUserData, Number, ValueRef};
 use crate::userdata::AnyUserData;
@@ -54,6 +55,8 @@ pub enum Value {
     Table(Table),
     /// Reference to a Lua function (or closure).
     Function(Function),
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     /// Reference to a Lua thread (or coroutine).
     Thread(Thread),
     /// Reference to a userdata object that holds a custom type which implements `UserData`.
@@ -91,6 +94,7 @@ impl Value {
             Value::String(_) => "string",
             Value::Table(_) => "table",
             Value::Function(_) => "function",
+            #[cfg(not(feature = "flua"))]
             Value::Thread(_) => "thread",
             Value::UserData(_) => "userdata",
             #[cfg(feature = "luau")]
@@ -137,9 +141,10 @@ impl Value {
             Value::LightUserData(ud) => ud.0,
             Value::Table(Table(vref))
             | Value::Function(Function(vref))
-            | Value::Thread(Thread(vref, ..))
             | Value::UserData(AnyUserData(vref))
             | Value::Other(vref) => vref.to_pointer(),
+            #[cfg(not(feature = "flua"))]
+            Value::Thread(Thread(vref, ..)) => vref.to_pointer(),
             #[cfg(feature = "luau")]
             Value::Buffer(crate::Buffer(vref)) => vref.to_pointer(),
             _ => ptr::null(),
@@ -176,9 +181,10 @@ impl Value {
             Value::String(s) => Ok(s.to_str()?.to_string()),
             Value::Table(Table(vref))
             | Value::Function(Function(vref))
-            | Value::Thread(Thread(vref, ..))
             | Value::UserData(AnyUserData(vref))
             | Value::Other(vref) => unsafe { invoke_to_string(vref) },
+            #[cfg(not(feature = "flua"))]
+            Value::Thread(Thread(vref, ..)) => unsafe { invoke_to_string(vref) },
             #[cfg(feature = "luau")]
             Value::Buffer(crate::Buffer(vref)) => unsafe { invoke_to_string(vref) },
             Value::Error(err) => Ok(err.to_string()),
@@ -395,6 +401,9 @@ impl Value {
     }
 
     /// Returns `true` if the value is a Lua [`Thread`].
+    ///
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     #[inline]
     pub fn is_thread(&self) -> bool {
         self.as_thread().is_some()
@@ -403,6 +412,8 @@ impl Value {
     /// Cast the value to [`Thread`].
     ///
     /// If the value is a Lua [`Thread`], returns it or `None` otherwise.
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     #[inline]
     pub fn as_thread(&self) -> Option<&Thread> {
         match self {
@@ -561,6 +572,7 @@ impl Value {
             }
             t @ Value::Table(_) => write!(fmt, "table: {:?}", t.to_pointer()),
             f @ Value::Function(_) => write!(fmt, "function: {:?}", f.to_pointer()),
+            #[cfg(not(feature = "flua"))]
             t @ Value::Thread(_) => write!(fmt, "thread: {:?}", t.to_pointer()),
             u @ Value::UserData(ud) => {
                 // Try `__name/__type` first then `__tostring`
@@ -603,6 +615,7 @@ impl fmt::Debug for Value {
             Value::String(s) => write!(fmt, "String({s:?})"),
             Value::Table(t) => write!(fmt, "{t:?}"),
             Value::Function(f) => write!(fmt, "{f:?}"),
+            #[cfg(not(feature = "flua"))]
             Value::Thread(t) => write!(fmt, "{t:?}"),
             Value::UserData(ud) => write!(fmt, "{ud:?}"),
             #[cfg(feature = "luau")]
@@ -628,6 +641,7 @@ impl PartialEq for Value {
             (Value::String(a), Value::String(b)) => a == b,
             (Value::Table(a), Value::Table(b)) => a == b,
             (Value::Function(a), Value::Function(b)) => a == b,
+            #[cfg(not(feature = "flua"))]
             (Value::Thread(a), Value::Thread(b)) => a == b,
             (Value::UserData(a), Value::UserData(b)) => a == b,
             #[cfg(feature = "luau")]
@@ -745,11 +759,19 @@ impl Serialize for SerializableValue<'_> {
             #[cfg(feature = "luau")]
             Value::Buffer(buf) => buf.serialize(serializer),
             Value::Function(_)
-            | Value::Thread(_)
             | Value::UserData(_)
             | Value::LightUserData(_)
             | Value::Error(_)
             | Value::Other(_) => {
+                if self.options.deny_unsupported_types {
+                    let msg = format!("cannot serialize <{}>", self.value.type_name());
+                    Err(ser::Error::custom(msg))
+                } else {
+                    serializer.serialize_unit()
+                }
+            }
+            #[cfg(not(feature = "flua"))]
+            Value::Thread(_) => {
                 if self.options.deny_unsupported_types {
                     let msg = format!("cannot serialize <{}>", self.value.type_name());
                     Err(ser::Error::custom(msg))

@@ -44,6 +44,7 @@ fn test_memory_limit() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_memory_limit_thread() -> Result<()> {
     let lua = Lua::new();

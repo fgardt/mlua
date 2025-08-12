@@ -22,12 +22,18 @@ fn test_value_eq() -> Result<()> {
         func1 = function() end
         func2 = func1
         func3 = function() end
-        thread1 = coroutine.create(function() end)
-        thread2 = thread1
 
         setmetatable(table1, {
             __eq = function(a, b) return a[1] == b[1] end
         })
+    "#,
+    )
+    .exec()?;
+    #[cfg(not(feature = "flua"))]
+    lua.load(
+        r#"
+        thread1 = coroutine.create(function() end)
+        thread2 = thread1
     "#,
     )
     .exec()?;
@@ -43,7 +49,9 @@ fn test_value_eq() -> Result<()> {
     let func1: Value = globals.get("func1")?;
     let func2: Value = globals.get("func2")?;
     let func3: Value = globals.get("func3")?;
+    #[cfg(not(feature = "flua"))]
     let thread1: Value = globals.get("thread1")?;
+    #[cfg(not(feature = "flua"))]
     let thread2: Value = globals.get("thread2")?;
     let null: Value = globals.get("null")?;
 
@@ -57,7 +65,9 @@ fn test_value_eq() -> Result<()> {
     assert!(func1 == func2);
     assert!(func1 != func3);
     assert!(!func1.equals(&func3)?);
+    #[cfg(not(feature = "flua"))]
     assert!(thread1 == thread2);
+    #[cfg(not(feature = "flua"))]
     assert!(thread1.equals(&thread2)?);
     assert!(null == Value::NULL);
 
@@ -99,6 +109,12 @@ fn test_value_to_pointer() -> Result<()> {
         string = "hello"
         num = 1
         func = function() end
+    "#,
+    )
+    .exec()?;
+    #[cfg(not(feature = "flua"))]
+    lua.load(
+        r#"
         thread = coroutine.create(function() end)
     "#,
     )
@@ -109,6 +125,7 @@ fn test_value_to_pointer() -> Result<()> {
     let string: Value = globals.get("string")?;
     let num: Value = globals.get("num")?;
     let func: Value = globals.get("func")?;
+    #[cfg(not(feature = "flua"))]
     let thread: Value = globals.get("thread")?;
     let null: Value = globals.get("null")?;
     let ud: Value = Value::UserData(lua.create_any_userdata(())?);
@@ -117,6 +134,7 @@ fn test_value_to_pointer() -> Result<()> {
     assert!(!string.to_pointer().is_null());
     assert!(num.to_pointer().is_null());
     assert!(!func.to_pointer().is_null());
+    #[cfg(not(feature = "flua"))]
     assert!(!thread.to_pointer().is_null());
     assert!(null.to_pointer().is_null());
     assert!(!ud.to_pointer().is_null());
@@ -174,9 +192,12 @@ fn test_value_to_string() -> Result<()> {
     assert!(func.to_string()?.starts_with("function:"));
     assert_eq!(func.type_name(), "function");
 
-    let thread: Value = lua.load("coroutine.create(function() end)").eval()?;
-    assert!(thread.to_string()?.starts_with("thread:"));
-    assert_eq!(thread.type_name(), "thread");
+    #[cfg(not(feature = "flua"))]
+    {
+        let thread: Value = lua.load("coroutine.create(function() end)").eval()?;
+        assert!(thread.to_string()?.starts_with("thread:"));
+        assert_eq!(thread.type_name(), "thread");
+    }
 
     lua.register_userdata_type::<StdString>(|reg| {
         reg.add_meta_method("__tostring", |_, this, ()| Ok(this.clone()));
@@ -262,7 +283,9 @@ fn test_value_conversions() -> Result<()> {
     assert!(Value::Function(lua.create_function(|_, ()| Ok(())).unwrap())
         .as_function()
         .is_some());
+    #[cfg(not(feature = "flua"))]
     assert!(Value::Thread(lua.create_thread(lua.load("function() end").eval()?)?).is_thread());
+    #[cfg(not(feature = "flua"))]
     assert!(
         Value::Thread(lua.create_thread(lua.load("function() end").eval()?)?)
             .as_thread()
@@ -301,6 +324,7 @@ fn test_value_exhaustive_match() {
         Value::String(_) => {}
         Value::Table(_) => {}
         Value::Function(_) => {}
+        #[cfg(not(feature = "flua"))]
         Value::Thread(_) => {}
         Value::UserData(_) => {}
         #[cfg(feature = "luau")]

@@ -1,4 +1,4 @@
-#![cfg(not(feature = "luau"))]
+#![cfg(not(any(feature = "luau", feature = "flua")))]
 
 use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::{Arc, Mutex};

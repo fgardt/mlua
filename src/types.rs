@@ -1,10 +1,12 @@
 use std::cell::UnsafeCell;
 use std::os::raw::{c_int, c_void};
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 use crate::debug::{Debug, HookTriggers};
 use crate::error::Result;
-use crate::state::{ExtraData, Lua, RawLua};
+#[cfg(not(feature = "flua"))]
+use crate::state::Lua;
+use crate::state::{ExtraData, RawLua};
 
 // Re-export mutex wrappers
 pub(crate) use sync::{ArcReentrantMutexGuard, ReentrantMutex, ReentrantMutexGuard, XRc, XWeak};
@@ -72,16 +74,16 @@ pub enum VmState {
     Yield,
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 pub(crate) enum HookKind {
     Global,
     Thread(HookTriggers, HookCallback),
 }
 
-#[cfg(all(feature = "send", not(feature = "luau")))]
+#[cfg(all(feature = "send", not(any(feature = "luau", feature = "flua"))))]
 pub(crate) type HookCallback = XRc<dyn Fn(&Lua, &Debug) -> Result<VmState> + Send>;
 
-#[cfg(all(not(feature = "send"), not(feature = "luau")))]
+#[cfg(all(not(feature = "send"), not(any(feature = "luau", feature = "flua"))))]
 pub(crate) type HookCallback = XRc<dyn Fn(&Lua, &Debug) -> Result<VmState>>;
 
 #[cfg(all(feature = "send", feature = "luau"))]

@@ -73,9 +73,9 @@ pub(crate) struct ExtraData {
     #[cfg(feature = "async")]
     pub(super) waker: NonNull<Waker>,
 
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     pub(super) hook_callback: Option<crate::types::HookCallback>,
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     pub(super) hook_triggers: crate::debug::HookTriggers,
     #[cfg(feature = "lua54")]
     pub(super) warn_callback: Option<crate::types::WarnCallback>,
@@ -176,9 +176,9 @@ impl ExtraData {
             wrapped_failure_mt_ptr,
             #[cfg(feature = "async")]
             waker: NonNull::from(noop_waker_ref()),
-            #[cfg(not(feature = "luau"))]
+            #[cfg(not(any(feature = "luau", feature = "flua")))]
             hook_callback: None,
-            #[cfg(not(feature = "luau"))]
+            #[cfg(not(any(feature = "luau", feature = "flua")))]
             hook_triggers: Default::default(),
             #[cfg(feature = "lua54")]
             warn_callback: None,

@@ -15,6 +15,7 @@ use crate::state::util::callback_error_ext;
 use crate::stdlib::StdLib;
 use crate::string::String;
 use crate::table::Table;
+#[cfg(not(feature = "flua"))]
 use crate::thread::Thread;
 use crate::traits::IntoLua;
 use crate::types::{
@@ -36,7 +37,7 @@ use crate::value::{Nil, Value};
 use super::extra::ExtraData;
 use super::{Lua, LuaOptions, WeakLua};
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 use crate::{
     debug::Debug,
     types::{HookCallback, HookKind, VmState},
@@ -153,7 +154,7 @@ impl RawLua {
                 (|| -> Result<()> {
                     let _sg = StackGuard::new(state);
 
-                    #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+                    #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
                     ffi::lua_rawgeti(state, ffi::LUA_REGISTRYINDEX, ffi::LUA_RIDX_GLOBALS);
                     #[cfg(any(feature = "lua51", feature = "luajit", feature = "luau"))]
                     ffi::lua_pushvalue(state, ffi::LUA_GLOBALSINDEX);
@@ -197,7 +198,7 @@ impl RawLua {
                 init_internal_metatable::<XRc<UnsafeCell<ExtraData>>>(state, None)?;
                 init_internal_metatable::<Callback>(state, None)?;
                 init_internal_metatable::<CallbackUpvalue>(state, None)?;
-                #[cfg(not(feature = "luau"))]
+                #[cfg(not(any(feature = "luau", feature = "flua")))]
                 init_internal_metatable::<HookCallback>(state, None)?;
                 #[cfg(feature = "async")]
                 {
@@ -292,7 +293,7 @@ impl RawLua {
         let res = load_std_libs(self.main_state(), libs);
 
         // If `package` library loaded into a safe lua state then disable C modules
-        #[cfg(not(feature = "luau"))]
+        #[cfg(not(any(feature = "luau", feature = "flua")))]
         if is_safe {
             let curr_libs = (*self.extra.get()).libs;
             if (curr_libs ^ (curr_libs | libs)).contains(StdLib::PACKAGE) {
@@ -401,7 +402,7 @@ impl RawLua {
     }
 
     /// Sets a hook for a thread (coroutine).
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     pub(crate) unsafe fn set_thread_hook(
         &self,
         thread_state: *mut ffi::lua_State,
@@ -596,6 +597,8 @@ impl RawLua {
     /// Wraps a Lua function into a new thread (or coroutine).
     ///
     /// Takes function by reference.
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     pub(crate) unsafe fn create_thread(&self, func: &Function) -> Result<Thread> {
         let state = self.state();
         let _sg = StackGuard::new(state);
@@ -679,6 +682,7 @@ impl RawLua {
             Value::String(s) => self.push_ref(&s.0),
             Value::Table(t) => self.push_ref(&t.0),
             Value::Function(f) => self.push_ref(&f.0),
+            #[cfg(not(feature = "flua"))]
             Value::Thread(t) => self.push_ref(&t.0),
             Value::UserData(ud) => self.push_ref(&ud.0),
             #[cfg(feature = "luau")]
@@ -722,7 +726,13 @@ impl RawLua {
                 }
             }
 
-            #[cfg(any(feature = "lua52", feature = "lua51", feature = "luajit", feature = "luau"))]
+            #[cfg(any(
+                feature = "lua52",
+                feature = "lua51",
+                feature = "luajit",
+                feature = "luau",
+                feature = "flua"
+            ))]
             ffi::LUA_TNUMBER => {
                 use crate::types::Number;
 
@@ -777,6 +787,7 @@ impl RawLua {
                 }
             }
 
+            #[cfg(not(feature = "flua"))]
             ffi::LUA_TTHREAD => {
                 ffi::lua_xpush(state, self.ref_thread(), idx);
                 let thread_state = ffi::lua_tothread(self.ref_thread(), -1);
@@ -851,7 +862,7 @@ impl RawLua {
         #[cfg(any(feature = "lua51", feature = "luajit", feature = "luau"))]
         ffi::lua_xpush(self.ref_thread(), state, ExtraData::ERROR_TRACEBACK_IDX);
         // Lua 5.2+ support light C functions that does not require extra allocations
-        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
         ffi::lua_pushcfunction(state, crate::util::error_traceback);
     }
 
@@ -1428,11 +1439,12 @@ unsafe fn load_std_libs(state: *mut ffi::lua_State, libs: StdLib) -> Result<()> 
         requiref(state, ffi::LUA_TABLIBNAME, ffi::luaopen_table, 1)?;
     }
 
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     if libs.contains(StdLib::IO) {
         requiref(state, ffi::LUA_IOLIBNAME, ffi::luaopen_io, 1)?;
     }
 
+    #[cfg(not(feature = "flua"))]
     if libs.contains(StdLib::OS) {
         requiref(state, ffi::LUA_OSLIBNAME, ffi::luaopen_os, 1)?;
     }
@@ -1448,7 +1460,7 @@ unsafe fn load_std_libs(state: *mut ffi::lua_State, libs: StdLib) -> Result<()> 
         }
     }
 
-    #[cfg(any(feature = "lua52", feature = "luau"))]
+    #[cfg(any(feature = "lua52", feature = "luau", feature = "flua"))]
     {
         if libs.contains(StdLib::BIT) {
             requiref(state, ffi::LUA_BITLIBNAME, ffi::luaopen_bit32, 1)?;
@@ -1476,11 +1488,19 @@ unsafe fn load_std_libs(state: *mut ffi::lua_State, libs: StdLib) -> Result<()> 
         requiref(state, ffi::LUA_MATHLIBNAME, ffi::luaopen_math, 1)?;
     }
 
+    #[cfg(not(feature = "flua"))]
     if libs.contains(StdLib::DEBUG) {
         requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_debug, 1)?;
     }
 
-    #[cfg(not(feature = "luau"))]
+    #[cfg(feature = "flua")]
+    if libs.contains(StdLib::DEBUG) {
+        requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_fulldebug, 1)?;
+    } else if libs.contains(StdLib::PARTIAL_DEBUG) {
+        requiref(state, ffi::LUA_DBLIBNAME, ffi::luaopen_partialdebug, 1)?;
+    }
+
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     if libs.contains(StdLib::PACKAGE) {
         requiref(state, ffi::LUA_LOADLIBNAME, ffi::luaopen_package, 1)?;
     }

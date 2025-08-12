@@ -29,7 +29,7 @@ fn test_weak_lua_panic() {
     let _ = weak_lua.upgrade();
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 #[test]
 fn test_safety() -> Result<()> {
     let lua = Lua::new();
@@ -1152,6 +1152,7 @@ fn test_chunk_env() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_context_thread() -> Result<()> {
     let lua = Lua::new();
@@ -1208,6 +1209,7 @@ fn test_jit_version() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_register_module() -> Result<()> {
     let lua = Lua::new();
@@ -1259,7 +1261,7 @@ fn test_register_module() -> Result<()> {
 }
 
 #[test]
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 fn test_preload_module() -> Result<()> {
     let lua = Lua::new();
 
@@ -1388,6 +1390,7 @@ fn test_inspect_stack() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_multi_states() -> Result<()> {
     let lua = Lua::new();

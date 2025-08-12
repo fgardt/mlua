@@ -999,9 +999,9 @@ impl Serialize for SerializableTable<'_> {
 
         // Array
         let len = self.table.raw_len();
-        if len > 0
-            || self.table.is_array()
+        if self.table.is_array()
             || (self.options.encode_empty_tables_as_array && self.table.is_empty())
+            || len > 0 && len == self.table.pairs::<Value, Value>().count()
         {
             let mut seq = serializer.serialize_seq(Some(len))?;
             let mut serialize_err = None;

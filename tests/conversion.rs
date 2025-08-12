@@ -7,8 +7,10 @@ use bstr::BString;
 use maplit::{btreemap, btreeset, hashmap, hashset};
 use mlua::{
     AnyUserData, BorrowedBytes, BorrowedStr, Either, Error, Function, IntoLua, Lua, RegistryKey, Result,
-    Table, Thread, UserDataRef, Value,
+    Table, UserDataRef, Value,
 };
+#[cfg(not(feature = "flua"))]
+use mlua::Thread;
 
 #[test]
 fn test_value_into_lua() -> Result<()> {
@@ -169,6 +171,7 @@ fn test_function_from_lua() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_thread_into_lua() -> Result<()> {
     let lua = Lua::new();
@@ -187,6 +190,7 @@ fn test_thread_into_lua() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_thread_from_lua() -> Result<()> {
     let lua = Lua::new();

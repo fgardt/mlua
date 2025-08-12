@@ -1,6 +1,8 @@
 use std::os::raw::c_void;
 
-use mlua::{Function, LightUserData, Lua, Number, Result, String as LuaString, Thread};
+use mlua::{Function, LightUserData, Lua, Number, Result, String as LuaString};
+#[cfg(not(feature = "flua"))]
+use mlua::Thread;
 
 #[test]
 fn test_lightuserdata() -> Result<()> {
@@ -118,6 +120,7 @@ fn test_function_type_metatable() -> Result<()> {
     Ok(())
 }
 
+#[cfg(not(feature = "flua"))]
 #[test]
 fn test_thread_type_metatable() -> Result<()> {
     let lua = Lua::new();

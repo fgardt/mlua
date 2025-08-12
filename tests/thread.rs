@@ -1,3 +1,5 @@
+#![cfg(not(feature = "flua"))]
+
 use std::panic::catch_unwind;
 
 use mlua::{Error, Function, Lua, Result, Thread, ThreadStatus};

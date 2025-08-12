@@ -17,17 +17,20 @@ use crate::scope::Scope;
 use crate::stdlib::StdLib;
 use crate::string::String;
 use crate::table::Table;
+#[cfg(not(feature = "flua"))]
 use crate::thread::Thread;
 use crate::traits::{FromLua, FromLuaMulti, IntoLua, IntoLuaMulti};
+#[cfg(not(feature = "flua"))]
+use crate::types::VmState;
 use crate::types::{
     AppDataRef, AppDataRefMut, ArcReentrantMutexGuard, Integer, LuaType, MaybeSend, Number, ReentrantMutex,
-    ReentrantMutexGuard, RegistryKey, VmState, XRc, XWeak,
+    ReentrantMutexGuard, RegistryKey, XRc, XWeak,
 };
 use crate::userdata::{AnyUserData, UserData, UserDataProxy, UserDataRegistry, UserDataStorage};
 use crate::util::{assert_stack, check_stack, protect_lua_closure, push_string, rawset_field, StackGuard};
 use crate::value::{Nil, Value};
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 use crate::{debug::HookTriggers, types::HookKind};
 
 #[cfg(any(feature = "luau", doc))]
@@ -221,7 +224,7 @@ impl Lua {
 
         let lua = unsafe { Self::inner_new(libs, options) };
 
-        #[cfg(not(feature = "luau"))]
+        #[cfg(not(any(feature = "luau", feature = "flua")))]
         if libs.contains(StdLib::PACKAGE) {
             mlua_expect!(lua.disable_c_modules(), "Error disabling C modules");
         }
@@ -381,7 +384,7 @@ impl Lua {
     #[cfg(not(feature = "luau"))]
     #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
     pub fn preload_module(&self, modname: &str, func: Function) -> Result<()> {
-        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
         let preload = unsafe {
             self.exec_raw::<Option<Table>>((), |state| {
                 ffi::lua_getfield(state, ffi::LUA_REGISTRYINDEX, ffi::LUA_PRELOAD_TABLE);
@@ -542,8 +545,8 @@ impl Lua {
     /// All new threads created (by mlua) after this call will use the global hook function.
     ///
     /// For more information see [`Lua::set_hook`].
-    #[cfg(not(feature = "luau"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
+    #[cfg_attr(docsrs, doc(cfg(any(feature = "luau", feature = "flua"))))]
     pub fn set_global_hook<F>(&self, triggers: HookTriggers, callback: F) -> Result<()>
     where
         F: Fn(&Lua, &Debug) -> Result<VmState> + MaybeSend + 'static,
@@ -592,8 +595,8 @@ impl Lua {
     /// ```
     ///
     /// [`HookTriggers.every_nth_instruction`]: crate::HookTriggers::every_nth_instruction
-    #[cfg(not(feature = "luau"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
+    #[cfg_attr(docsrs, doc(cfg(not(any(feature = "luau", feature = "flua")))))]
     pub fn set_hook<F>(&self, triggers: HookTriggers, callback: F) -> Result<()>
     where
         F: Fn(&Lua, &Debug) -> Result<VmState> + MaybeSend + 'static,
@@ -605,8 +608,8 @@ impl Lua {
     /// Removes a global hook previously set by [`Lua::set_global_hook`].
     ///
     /// This function has no effect if a hook was not previously set.
-    #[cfg(not(feature = "luau"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
+    #[cfg_attr(docsrs, doc(cfg(not(any(feature = "luau", feature = "flua")))))]
     pub fn remove_global_hook(&self) {
         let lua = self.lock();
         unsafe {
@@ -1028,7 +1031,8 @@ impl Lua {
             feature = "lua52",
             feature = "lua51",
             feature = "luajit",
-            feature = "luau"
+            feature = "luau",
+            feature = "flua"
         ))]
         unsafe {
             if pause > 0 {
@@ -1369,6 +1373,8 @@ impl Lua {
     /// Wraps a Lua function into a new thread (or coroutine).
     ///
     /// Equivalent to `coroutine.create`.
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     pub fn create_thread(&self, func: Function) -> Result<Thread> {
         unsafe { self.lock().create_thread(&func) }
     }
@@ -1560,7 +1566,7 @@ impl Lua {
         unsafe {
             let _sg = StackGuard::new(state);
             assert_stack(state, 1);
-            #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+            #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
             ffi::lua_rawgeti(state, ffi::LUA_REGISTRYINDEX, ffi::LUA_RIDX_GLOBALS);
             #[cfg(any(feature = "lua51", feature = "luajit", feature = "luau"))]
             ffi::lua_pushvalue(state, ffi::LUA_GLOBALSINDEX);
@@ -1592,7 +1598,7 @@ impl Lua {
 
             lua.push_ref(&globals.0);
 
-            #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+            #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
             ffi::lua_rawseti(state, ffi::LUA_REGISTRYINDEX, ffi::LUA_RIDX_GLOBALS);
             #[cfg(any(feature = "lua51", feature = "luajit", feature = "luau"))]
             ffi::lua_replace(state, ffi::LUA_GLOBALSINDEX);
@@ -1605,6 +1611,8 @@ impl Lua {
     ///
     /// For calls to `Lua` this will be the main Lua thread, for parameters given to a callback,
     /// this will be whatever Lua thread called the callback.
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     pub fn current_thread(&self) -> Thread {
         let lua = self.lock();
         let state = lua.state();
@@ -2080,7 +2088,7 @@ impl Lua {
         WeakLua(XRc::downgrade(&self.raw))
     }
 
-    #[cfg(not(feature = "luau"))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
     fn disable_c_modules(&self) -> Result<()> {
         let package: Table = self.globals().get("package")?;
 
@@ -2093,7 +2101,7 @@ impl Lua {
             })?,
         )?;
 
-        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52"))]
+        #[cfg(any(feature = "lua54", feature = "lua53", feature = "lua52", feature = "flua"))]
         let searchers: Table = package.get("searchers")?;
         #[cfg(any(feature = "lua51", feature = "luajit"))]
         let searchers: Table = package.get("loaders")?;

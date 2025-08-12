@@ -34,7 +34,7 @@ impl TypeKey for CallbackUpvalue {
     }
 }
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 impl TypeKey for crate::types::HookCallback {
     #[inline(always)]
     fn type_key() -> *const c_void {

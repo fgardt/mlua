@@ -155,7 +155,11 @@ impl<'de> serde::Deserializer<'de> for Deserializer {
                 Ok(s) => visitor.visit_str(&s),
                 Err(_) => visitor.visit_bytes(&s.as_bytes()),
             },
-            Value::Table(ref t) if t.raw_len() > 0 || t.is_array() => self.deserialize_seq(visitor),
+            Value::Table(ref t)
+                if t.is_array() || t.raw_len() > 0 && t.raw_len() == t.pairs::<Value, Value>().count() =>
+            {
+                self.deserialize_seq(visitor)
+            }
             Value::Table(ref t) if self.options.encode_empty_tables_as_array && t.is_empty() => {
                 self.deserialize_seq(visitor)
             }
@@ -170,11 +174,19 @@ impl<'de> serde::Deserializer<'de> for Deserializer {
                 visitor.visit_bytes(buf.as_slice(&lua))
             }
             Value::Function(_)
-            | Value::Thread(_)
             | Value::UserData(_)
             | Value::LightUserData(_)
             | Value::Error(_)
             | Value::Other(_) => {
+                if self.options.deny_unsupported_types {
+                    let msg = format!("unsupported value type `{}`", self.value.type_name());
+                    Err(de::Error::custom(msg))
+                } else {
+                    visitor.visit_unit()
+                }
+            }
+            #[cfg(not(feature = "flua"))]
+            Value::Thread(_) => {
                 if self.options.deny_unsupported_types {
                     let msg = format!("unsupported value type `{}`", self.value.type_name());
                     Err(de::Error::custom(msg))
@@ -718,13 +730,13 @@ pub(crate) fn check_value_for_skip(
             }
         }
         Value::UserData(ud) if ud.is_serializable() => {}
-        Value::Function(_)
-        | Value::Thread(_)
-        | Value::UserData(_)
-        | Value::LightUserData(_)
-        | Value::Error(_)
+        Value::Function(_) | Value::UserData(_) | Value::LightUserData(_) | Value::Error(_)
             if !options.deny_unsupported_types =>
         {
+            return Ok(true); // skip
+        }
+        #[cfg(not(feature = "flua"))]
+        Value::Thread(_) if !options.deny_unsupported_types => {
             return Ok(true); // skip
         }
         _ => {}

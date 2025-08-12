@@ -10,14 +10,17 @@ pub use crate::{
     MetaMethod as LuaMetaMethod, MultiValue as LuaMultiValue, Nil as LuaNil, Number as LuaNumber,
     ObjectLike as LuaObjectLike, RegistryKey as LuaRegistryKey, Result as LuaResult, StdLib as LuaStdLib,
     String as LuaString, Table as LuaTable, TablePairs as LuaTablePairs, TableSequence as LuaTableSequence,
-    Thread as LuaThread, ThreadStatus as LuaThreadStatus, UserData as LuaUserData,
-    UserDataFields as LuaUserDataFields, UserDataMetatable as LuaUserDataMetatable,
+    UserData as LuaUserData, UserDataFields as LuaUserDataFields, UserDataMetatable as LuaUserDataMetatable,
     UserDataMethods as LuaUserDataMethods, UserDataRef as LuaUserDataRef,
     UserDataRefMut as LuaUserDataRefMut, UserDataRegistry as LuaUserDataRegistry, Value as LuaValue,
     Variadic as LuaVariadic, VmState as LuaVmState, WeakLua,
 };
 
-#[cfg(not(feature = "luau"))]
+#[cfg(not(feature = "flua"))]
+#[doc(no_inline)]
+pub use crate::{Thread as LuaThread, ThreadStatus as LuaThreadStatus};
+
+#[cfg(not(any(feature = "luau", feature = "flua")))]
 #[doc(no_inline)]
 pub use crate::HookTriggers as LuaHookTriggers;
 

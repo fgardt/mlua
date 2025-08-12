@@ -141,7 +141,7 @@ pub(crate) unsafe fn pop_error(state: *mut ffi::lua_State, err_code: c_int) -> E
                     Error::RuntimeError(err_string)
                 }
                 ffi::LUA_ERRMEM => Error::MemoryError(err_string),
-                #[cfg(any(feature = "lua53", feature = "lua52"))]
+                #[cfg(any(feature = "lua53", feature = "lua52", feature = "flua"))]
                 ffi::LUA_ERRGCMM => Error::GarbageCollectorError(err_string),
                 _ => mlua_panic!("unrecognized lua error code"),
             }
@@ -276,6 +276,8 @@ pub(crate) unsafe extern "C-unwind" fn error_traceback(state: *mut ffi::lua_Stat
 }
 
 // A variant of `error_traceback` that can safely inspect another (yielded) thread stack
+#[cfg(not(feature = "flua"))]
+#[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
 pub(crate) unsafe fn error_traceback_thread(state: *mut ffi::lua_State, thread: *mut ffi::lua_State) {
     // Move error object to the main thread to safely call `__tostring` metamethod if present
     ffi::lua_xmove(thread, state, 1);

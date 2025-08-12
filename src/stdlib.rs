@@ -17,11 +17,13 @@ impl StdLib {
     pub const TABLE: StdLib = StdLib(1 << 1);
 
     /// [`io`](https://www.lua.org/manual/5.4/manual.html#6.8) library
-    #[cfg(not(feature = "luau"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
+    #[cfg_attr(docsrs, doc(cfg(not(any(feature = "luau", feature = "flua")))))]
     pub const IO: StdLib = StdLib(1 << 2);
 
     /// [`os`](https://www.lua.org/manual/5.4/manual.html#6.9) library
+    #[cfg(not(feature = "flua"))]
+    #[cfg_attr(docsrs, doc(cfg(not(feature = "flua"))))]
     pub const OS: StdLib = StdLib(1 << 3);
 
     /// [`string`](https://www.lua.org/manual/5.4/manual.html#6.4) library
@@ -33,10 +35,16 @@ impl StdLib {
     pub const UTF8: StdLib = StdLib(1 << 5);
 
     /// [`bit`](https://www.lua.org/manual/5.2/manual.html#6.7) library
-    #[cfg(any(feature = "lua52", feature = "luajit", feature = "luau", doc))]
+    #[cfg(any(
+        feature = "lua52",
+        feature = "luajit",
+        feature = "luau",
+        feature = "flua",
+        doc
+    ))]
     #[cfg_attr(
         docsrs,
-        doc(cfg(any(feature = "lua52", feature = "luajit", feature = "luau")))
+        doc(cfg(any(feature = "lua52", feature = "luajit", feature = "luau", feature = "flua")))
     )]
     pub const BIT: StdLib = StdLib(1 << 6);
 
@@ -44,8 +52,8 @@ impl StdLib {
     pub const MATH: StdLib = StdLib(1 << 7);
 
     /// [`package`](https://www.lua.org/manual/5.4/manual.html#6.3) library
-    #[cfg(not(feature = "luau"))]
-    #[cfg_attr(docsrs, doc(cfg(not(feature = "luau"))))]
+    #[cfg(not(any(feature = "luau", feature = "flua")))]
+    #[cfg_attr(docsrs, doc(cfg(not(any(feature = "luau", feature = "flua")))))]
     pub const PACKAGE: StdLib = StdLib(1 << 8);
 
     /// [`buffer`](https://luau.org/library#buffer-library) library
@@ -62,6 +70,12 @@ impl StdLib {
     #[cfg(any(feature = "luajit", doc))]
     #[cfg_attr(docsrs, doc(cfg(feature = "luajit")))]
     pub const JIT: StdLib = StdLib(1 << 11);
+
+    /// [`flua's safe debug library subset`](https://lua-api.factorio.com/latest/auxiliary/libraries.html#%E2%80%A2-debug)
+    ///
+    /// Requires `feature = "flua"`
+    #[cfg(feature = "flua")]
+    pub const PARTIAL_DEBUG: StdLib = StdLib(1 << 12);
 
     /// (**unsafe**) [`ffi`](http://luajit.org/ext_ffi.html) library
     #[cfg(any(feature = "luajit", doc))]

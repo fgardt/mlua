@@ -120,10 +120,13 @@ fn test_serialize_failure() -> Result<(), Box<dyn StdError>> {
         Err(serde_json::Error { .. }) => {}
     }
 
-    let thr = lua.create_thread(func)?;
-    match serde_json::to_value(&Value::Thread(thr)) {
-        Ok(v) => panic!("expected serialization error, got {}", v),
-        Err(serde_json::Error { .. }) => {}
+    #[cfg(not(feature = "flua"))]
+    {
+        let thr = lua.create_thread(func)?;
+        match serde_json::to_value(&Value::Thread(thr)) {
+            Ok(v) => panic!("expected serialization error, got {}", v),
+            Err(serde_json::Error { .. }) => {}
+        }
     }
 
     Ok(())

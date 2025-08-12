@@ -15,6 +15,7 @@ use crate::function::Function;
 use crate::state::{Lua, RawLua};
 use crate::string::{BorrowedBytes, BorrowedStr, String};
 use crate::table::Table;
+#[cfg(not(feature = "flua"))]
 use crate::thread::Thread;
 use crate::traits::{FromLua, IntoLua, ShortTypeName as _};
 use crate::types::{Either, LightUserData, MaybeSend, RegistryKey};
@@ -247,6 +248,7 @@ impl FromLua for Function {
     }
 }
 
+#[cfg(not(feature = "flua"))]
 impl IntoLua for Thread {
     #[inline]
     fn into_lua(self, _: &Lua) -> Result<Value> {
@@ -254,6 +256,7 @@ impl IntoLua for Thread {
     }
 }
 
+#[cfg(not(feature = "flua"))]
 impl IntoLua for &Thread {
     #[inline]
     fn into_lua(self, _: &Lua) -> Result<Value> {
@@ -267,6 +270,7 @@ impl IntoLua for &Thread {
     }
 }
 
+#[cfg(not(feature = "flua"))]
 impl FromLua for Thread {
     #[inline]
     fn from_lua(value: Value, _: &Lua) -> Result<Thread> {
